@@ -11,7 +11,7 @@ impl ContentsFormat for Zenn {
     }
 
     fn get_articles_dirname(&self) -> &str {
-        return "";
+        return "articles";
     }
 
     fn get_images_dirname(&self) -> &str {
