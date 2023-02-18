@@ -42,14 +42,6 @@ impl<From: ContentsFormat, To: ContentsFormat> ContentsTransformer<From, To> {
         let root = parse_document(&arena, &file_body, &options);
 
         iter_nodes(root, &|node| match &mut node.data.borrow_mut().value {
-            &mut NodeValue::Text(ref mut text) => {
-                let orig = std::mem::replace(text, vec![]);
-                *text = String::from_utf8(orig)
-                    .unwrap()
-                    .replace("my", "your")
-                    .as_bytes()
-                    .to_vec();
-            }
             &mut NodeValue::FrontMatter(ref mut text) => {
                 let front_matter_str = String::from_utf8(text.to_vec()).unwrap();
                 let front_matters = self.source.parse_front_matter(front_matter_str);
