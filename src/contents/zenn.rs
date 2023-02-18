@@ -15,18 +15,22 @@ impl ContentsFormat for Zenn {
     }
 
     fn get_images_dirname(&self) -> &str {
-        todo!()
+        return "images";
     }
 
     fn get_front_matter_delimiter(&self) -> &str {
         return "---";
     }
 
+    fn is_local_image(&self, image_link: String) -> bool {
+        return image_link.starts_with(&format!("/images"));
+    }
+
     fn parse_front_matter(&self, front_matter_str: String) -> FrontMatter {
         let mut regex_map = HashMap::new();
-        regex_map.insert("title", r"\ntitle: (.*?)\n");
-        regex_map.insert("emoji", r"\nemoji: (.*?)\n");
-        regex_map.insert("type", r"\ntype: (.*?)\n");
+        regex_map.insert("title", r#"\ntitle: "(.*?)"\n"#);
+        regex_map.insert("emoji", r#"\nemoji: "(.*?)"\n"#);
+        regex_map.insert("type", r#"\ntype: "(.*?)"\n"#);
         regex_map.insert("topics", r"\ntopics: (.*?)\n");
         regex_map.insert("published", r"\npublished: (.*?)\n");
         regex_map.insert("published_at", r"\npublished_at: (.*?)\n");
@@ -48,6 +52,10 @@ impl ContentsFormat for Zenn {
     }
 
     fn format_front_matter(&self, front_matters: FrontMatter) -> String {
+        todo!()
+    }
+
+    fn format_image_path(&self, filename: &str) -> String {
         todo!()
     }
 }

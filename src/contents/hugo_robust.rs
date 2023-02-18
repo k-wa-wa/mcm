@@ -11,11 +11,15 @@ impl ContentsFormat for HugoRobust {
     }
 
     fn get_images_dirname(&self) -> &str {
-        return "assets";
+        return "static/img";
     }
 
     fn get_front_matter_delimiter(&self) -> &str {
         return "+++";
+    }
+
+    fn is_local_image(&self, image_link: String) -> bool {
+        todo!()
     }
 
     fn format_front_matter(&self, front_matters: FrontMatter) -> String {
@@ -34,5 +38,9 @@ thumbnail = \"\"
 
     fn parse_front_matter(&self, front_matter_str: String) -> FrontMatter {
         todo!()
+    }
+
+    fn format_image_path(&self, filename: &str) -> String {
+        return format!("/img/{}", filename);
     }
 }

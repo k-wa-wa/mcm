@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs, fs::File, io::Write, path::Path};
 
 use comrak::{
     format_commonmark,
-    nodes::{AstNode, NodeValue},
+    nodes::{AstNode, NodeLink, NodeValue},
     parse_document, Arena, ComrakOptions,
 };
 use glob::glob;
@@ -42,6 +42,20 @@ impl<From: ContentsFormat, To: ContentsFormat> ContentsTransformer<From, To> {
         let root = parse_document(&arena, &file_body, &options);
 
         iter_nodes(root, &|node| match &mut node.data.borrow_mut().value {
+            &mut NodeValue::Image(ref mut node_link) => {
+                let image_link = String::from_utf8(node_link.url.to_vec()).unwrap();
+                if self.source.is_local_image(image_link.to_string()) {
+                    let filename = Path::new(&image_link)
+                        .file_name()
+                        .unwrap()
+                        .to_str()
+                        .unwrap();
+                    *node_link = NodeLink {
+                        url: self.target.format_image_path(filename).as_bytes().to_vec(),
+                        title: node_link.title.to_vec(),
+                    }
+                }
+            }
             &mut NodeValue::FrontMatter(ref mut text) => {
                 let front_matter_str = String::from_utf8(text.to_vec()).unwrap();
                 let front_matters = self.source.parse_front_matter(front_matter_str);
@@ -83,6 +97,24 @@ impl<From: ContentsFormat, To: ContentsFormat> ContentsTransformer<From, To> {
                 .unwrap();
         }
         // images
+        for source_filepath in glob(
+            Path::new(&self.source_dirpath)
+                .join(self.source.get_images_dirname())
+                .join("*")
+                .to_str()
+                .unwrap(),
+        )
+        .unwrap()
+        .map(|e| e.unwrap())
+        {
+            let source_filename = source_filepath.file_name().unwrap().to_str().unwrap();
+
+            let target_dirpath =
+                Path::new(&self.target_dirpath).join(self.target.get_images_dirname());
+            fs::create_dir_all(&target_dirpath).unwrap();
+            let target_filepath = target_dirpath.join(source_filename);
+            fs::copy(source_filepath, target_filepath).unwrap();
+        }
     }
 }
 
@@ -93,8 +125,11 @@ trait ContentsFormat {
     fn get_images_dirname(&self) -> &str;
     fn get_front_matter_delimiter(&self) -> &str;
 
+    fn is_local_image(&self, image_link: String) -> bool;
+
     fn parse_front_matter(&self, front_matter_str: String) -> FrontMatter;
     fn format_front_matter(&self, front_matters: FrontMatter) -> String;
+    fn format_image_path(&self, filename: &str) -> String;
 }
 
 struct FrontMatter {
