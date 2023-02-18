@@ -19,7 +19,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Export {
-        #[arg(short = 'f', long = "source", value_enum)]
+        #[arg(short = 's', long = "source", value_enum)]
         source: Format,
 
         #[arg(short = 't', long = "target", value_enum)]
